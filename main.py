@@ -52,6 +52,8 @@ for x in range(2):
 #Variables
 myChoice = ''
 delayCounter = 0 #çoklu tıklamayı önlemek için sayaç oluşturduk
+isContinue = False
+isChosen = (myChoice == 'Filter Coffee is chosen.') | (myChoice == 'Americano is chosen.') | (myChoice == 'Latte is chosen.') | (myChoice == 'Long Black is chosen.') | (myChoice == 'Guillermo is chosen.') | (myChoice == 'Frappe is chosen.') | (myChoice == 'Espresso is chosen.') | (myChoice == 'Cappuccino is chosen.')
 
 #Loop
 while True:
@@ -82,12 +84,31 @@ while True:
             for i, button in enumerate(buttonList):
                 if button.checkClick(x, y):
                     myValue = buttonListValues[int(i % 5)][int(i / 5)]  # get correct number
-                    if myValue == 'Continue': #örnekte burada eşittire basılırsa mat işlemi yapıyor
-                        myChoice = 'To continue, press payment button.' #eval komutu matematik işlemi yapıyor bizim sıfırlama olayını yapacağımız yer burası
-                    elif myValue == 'Pay it':
-                        myChoice = 'Your payment is accepted.'
-                    else:
+                    if myValue == 'Filter Coffee':
                         myChoice = myValue + ' is chosen.'
+                    elif myValue == 'Americano':
+                        myChoice = myValue + ' is chosen.'
+                    elif myValue == 'Latte':
+                        myChoice = myValue + ' is chosen.'
+                    elif myValue == 'Long Black':
+                        myChoice = myValue + ' is chosen.'
+                    elif myValue == 'Guillermo':
+                        myChoice = myValue + ' is chosen.'
+                    elif myValue == 'Frappe':
+                        myChoice = myValue + ' is chosen.'
+                    elif myValue == 'Espresso':
+                        myChoice = myValue + ' is chosen.'
+                    elif myValue == 'Cappuccino':
+                        myChoice = myValue + ' is chosen.'
+                    elif (myValue == 'Continue') & ((myChoice == 'Filter Coffee is chosen.') | (myChoice == 'Americano is chosen.') | (myChoice == 'Latte is chosen.') | (myChoice == 'Long Black is chosen.') | (myChoice == 'Guillermo is chosen.') | (myChoice == 'Frappe is chosen.') | (myChoice == 'Espresso is chosen.') | (myChoice == 'Cappuccino is chosen.')):
+                        isContinue = True
+                        myChoice = 'To continue, press pay it button.'
+                    elif (myValue == 'Pay it') & isContinue:
+                        myChoice = 'Your payment is done. Coffee is getting ready...'
+                        isContinue = False #After payment is done, turn it to isContinue false to prevent to press payment directly.
+                    else:
+                        myChoice = '' #To prevent writing something to screen among clicks.
+
                     delayCounter = 1
 
 #multi-click prevention
@@ -98,7 +119,7 @@ while True:
 
     #Display the Result
     cv2.putText(img, myChoice, (345, 110), cv2.FONT_HERSHEY_PLAIN,
-                2, (80, 50, 80), 3)
+                2, (225, 10, 10), 3)
 
     #Display Image
     key = cv2.waitKey(1)
