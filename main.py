@@ -1,3 +1,5 @@
+import os
+
 import cv2
 from cvzone.HandTrackingModule import HandDetector
 
@@ -30,15 +32,15 @@ class Button:
             return False
 
 #WebCam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0) #0 is for laptop webcam, 1 is for external webcam
 cap.set(3, 1288) #width
 cap.set(4, 720) #height
 detector = HandDetector(detectionCon=0.8, maxHands=1)
 
 #Create Button
 buttonListValues = [['Filter Coffee', 'Americano'],
-                    ['Latte', 'Long Black'],
-                    ['Guillermo', 'Frappe'],
+                    ['Latte', 'Mocha'],
+                    ['Ristretto', 'Frappe'],
                     ['Espresso', 'Cappuccino'],
                     ['Continue', 'Pay it']]
 buttonList = []
@@ -52,8 +54,16 @@ for x in range(2):
 #Variables
 myChoice = ''
 delayCounter = 0 #çoklu tıklamayı önlemek için sayaç oluşturduk
+
 isContinue = False
-isChosen = (myChoice == 'Filter Coffee is chosen.') | (myChoice == 'Americano is chosen.') | (myChoice == 'Latte is chosen.') | (myChoice == 'Long Black is chosen.') | (myChoice == 'Guillermo is chosen.') | (myChoice == 'Frappe is chosen.') | (myChoice == 'Espresso is chosen.') | (myChoice == 'Cappuccino is chosen.')
+
+imageFolderPath = "/Users/black/PycharmProjects/VirtualVendingMachine/resources"
+imageList = os.listdir(imageFolderPath)
+overlayList = []
+for imagePath in imageList:
+    image = cv2.imread(f'{imageFolderPath}/{imagePath}')
+    print(f'{imageFolderPath}/{imagePath}')
+    overlayList.append(image)
 
 #Loop
 while True:
@@ -64,20 +74,13 @@ while True:
     #Detection hand
     hands, img = detector.findHands(img, flipType=False)
 
-    #Drawing top level rectangular
-    # cv2.rectangle(img, (600, 80), (600 + 580, 50 + 100),
-    #               (225, 225, 225), cv2.FILLED)
-    #
-    # cv2.rectangle(img, (600, 80), (600 + 580, 50 + 100),
-    #               (50, 50, 50), 3)
-
     for button in buttonList:
         button.draw(img)
 
     #Finger Click
     if hands:
         lmList = hands[0]['lmList']
-        length, _, img = detector.findDistance(lmList[8], lmList[12], img) #burada 8numaralı ve 12numaralı noktaları alıyoruz ve uzunluğunu ölçüyoruz
+        length, _, img = detector.findDistance(lmList[8], lmList[12], img)
         print(length)
         x, y = lmList[8]
         if length < 50 and delayCounter == 0:
@@ -90,9 +93,9 @@ while True:
                         myChoice = myValue + ' is chosen.'
                     elif myValue == 'Latte':
                         myChoice = myValue + ' is chosen.'
-                    elif myValue == 'Long Black':
+                    elif myValue == 'Mocha':
                         myChoice = myValue + ' is chosen.'
-                    elif myValue == 'Guillermo':
+                    elif myValue == 'Ristretto':
                         myChoice = myValue + ' is chosen.'
                     elif myValue == 'Frappe':
                         myChoice = myValue + ' is chosen.'
@@ -100,7 +103,7 @@ while True:
                         myChoice = myValue + ' is chosen.'
                     elif myValue == 'Cappuccino':
                         myChoice = myValue + ' is chosen.'
-                    elif (myValue == 'Continue') & ((myChoice == 'Filter Coffee is chosen.') | (myChoice == 'Americano is chosen.') | (myChoice == 'Latte is chosen.') | (myChoice == 'Long Black is chosen.') | (myChoice == 'Guillermo is chosen.') | (myChoice == 'Frappe is chosen.') | (myChoice == 'Espresso is chosen.') | (myChoice == 'Cappuccino is chosen.')):
+                    elif (myValue == 'Continue') & ((myChoice == 'Filter Coffee is chosen.') | (myChoice == 'Americano is chosen.') | (myChoice == 'Latte is chosen.') | (myChoice == 'Mocha is chosen.') | (myChoice == 'Ristretto is chosen.') | (myChoice == 'Frappe is chosen.') | (myChoice == 'Espresso is chosen.') | (myChoice == 'Cappuccino is chosen.')):
                         isContinue = True
                         myChoice = 'To continue, press pay it button.'
                     elif (myValue == 'Pay it') & isContinue:
@@ -111,7 +114,7 @@ while True:
 
                     delayCounter = 1
 
-#multi-click prevention
+    #Multi-click prevention
     if delayCounter != 0:
         delayCounter += 1
         if delayCounter > 10:
