@@ -1,5 +1,3 @@
-import os
-
 import cv2
 from cvzone.HandTrackingModule import HandDetector
 
@@ -19,7 +17,7 @@ class Button:
         cv2.putText(img, self.value, (self.pos[0] + 2, self.pos[1] + 50), cv2.FONT_HERSHEY_PLAIN,
                     2, (50, 50, 50), 2)
 
-    def checkClick(self, x, y): # clikc fonksiyonu burası. Belirlenen mesafe 50 iki parmak arası 50 uzunluğu altındaysa ilk if kısmına giriyor
+    def checkClick(self, x, y):
         if self.pos[0] < x < self.pos[0] + self.width and \
                 self.pos[1] < y < self.pos[1] + self.height:
             cv2.rectangle(img, (self.pos[0] + 3, self.pos[1] + 3),
@@ -31,13 +29,27 @@ class Button:
         else:
             return False
 
-#WebCam
-cap = cv2.VideoCapture(0) #0 is for laptop webcam, 1 is for external webcam
-cap.set(3, 1288) #width
-cap.set(4, 720) #height
+
+# Photo identification
+imgBackground = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/background.png")
+imgEspBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/espressobg.png")
+imgAmeBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/americanobg.png")
+imgCapBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/cappuccinobg.png")
+imgContBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/continiuebg.png")
+imgFilterBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/filterbg.png")
+imgFrappeBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/frappebg.png")
+imgLatteBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/lattebg.png")
+imgMochaBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/mochabg.png")
+imgPayBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/paybg.png")
+imgRisseBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/ristrettobg.png")
+
+# WebCam
+cap = cv2.VideoCapture(0)  # 0 is for laptop webcam, 1 is for external webcam
+cap.set(3, 1288)  # Width
+cap.set(4, 720)  # Height
 detector = HandDetector(detectionCon=0.8, maxHands=1)
 
-#Create Button
+# Create Button
 buttonListValues = [['Filter Coffee', 'Americano'],
                     ['Latte', 'Mocha'],
                     ['Ristretto', 'Frappe'],
@@ -51,33 +63,35 @@ for x in range(2):
 
         buttonList.append(Button((xpos, ypos), 300, 80, buttonListValues[y][x]))
 
-#Variables
+# Variables
 myChoice = ''
-delayCounter = 0 #çoklu tıklamayı önlemek için sayaç oluşturduk
+delayCounter = 0
 
 isContinue = False
 
-imageFolderPath = "/Users/black/PycharmProjects/VirtualVendingMachine/resources"
-imageList = os.listdir(imageFolderPath)
-overlayList = []
-for imagePath in imageList:
-    image = cv2.imread(f'{imageFolderPath}/{imagePath}')
-    print(f'{imageFolderPath}/{imagePath}')
-    overlayList.append(image)
+myChoiceImg = imgBackground
 
-#Loop
+
+# Loop
+def chosen_value(chosen):
+    return chosen + " is chosen."
+
+
 while True:
-    #Get image from webcam
+    # Get image from webcam
     success, img = cap.read()
-    img = cv2.flip(img, 1) #kamerayı döndürüyor.
+    img = cv2.flip(img, 1)
 
-    #Detection hand
+    # Detection hand
     hands, img = detector.findHands(img, flipType=False)
+
+    # Overlaying the background image
+    img = cv2.addWeighted(img, 0.2, myChoiceImg, 0.8, 0)
 
     for button in buttonList:
         button.draw(img)
 
-    #Finger Click
+    # Finger Click
     if hands:
         lmList = hands[0]['lmList']
         length, _, img = detector.findDistance(lmList[8], lmList[12], img)
@@ -86,49 +100,61 @@ while True:
         if length < 50 and delayCounter == 0:
             for i, button in enumerate(buttonList):
                 if button.checkClick(x, y):
-                    myValue = buttonListValues[int(i % 5)][int(i / 5)]  # get correct number
+                    myValue = buttonListValues[int(i % 5)][int(i / 5)]  # Get correct number
                     if myValue == 'Filter Coffee':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgFilterBg
                     elif myValue == 'Americano':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgAmeBg
                     elif myValue == 'Latte':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgLatteBg
                     elif myValue == 'Mocha':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgMochaBg
                     elif myValue == 'Ristretto':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgRisseBg
                     elif myValue == 'Frappe':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgFrappeBg
                     elif myValue == 'Espresso':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgEspBg
                     elif myValue == 'Cappuccino':
-                        myChoice = myValue + ' is chosen.'
+                        myChoice = chosen_value(myValue)
+                        myChoiceImg = imgCapBg
                     elif (myValue == 'Continue') & ((myChoice == 'Filter Coffee is chosen.') | (myChoice == 'Americano is chosen.') | (myChoice == 'Latte is chosen.') | (myChoice == 'Mocha is chosen.') | (myChoice == 'Ristretto is chosen.') | (myChoice == 'Frappe is chosen.') | (myChoice == 'Espresso is chosen.') | (myChoice == 'Cappuccino is chosen.')):
                         isContinue = True
                         myChoice = 'To continue, press pay it button.'
+                        myChoiceImg = imgContBg
                     elif (myValue == 'Pay it') & isContinue:
                         myChoice = 'Your payment is done. Coffee is getting ready...'
-                        isContinue = False #After payment is done, turn it to isContinue false to prevent to press payment directly.
+                        # After payment is done, turn it to isContinue false to prevent to press payment directly.
+                        isContinue = False
+                        myChoiceImg = imgPayBg
                     else:
-                        myChoice = '' #To prevent writing something to screen among clicks.
+                        # To prevent writing something to screen among clicks.
+                        myChoice = ''
 
                     delayCounter = 1
 
-    #Multi-click prevention
+    # Multi-click prevention
     if delayCounter != 0:
-        delayCounter += 1
-        if delayCounter > 10:
+        delayCounter += 5
+        if delayCounter > 50:
             delayCounter = 0
 
-    #Display the Result
-    cv2.putText(img, myChoice, (345, 110), cv2.FONT_HERSHEY_PLAIN,
+    # Display the Result
+    cv2.putText(img, myChoice, (270, 120), cv2.FONT_HERSHEY_PLAIN,
                 2, (225, 10, 10), 3)
 
-    #Display Image
+    # Display Image
     key = cv2.waitKey(1)
     cv2.imshow("Virtual Coffee Vending Machine", img)
-    #cv2.waitKey(1)
-    if key == ord('c'): #burada klavyede c tuşuna basınca ekran sıfırlanıyor
+
+    if key == ord('c'):
         myChoice = ''
 
 
