@@ -61,6 +61,9 @@ for x in range(2):
         xpos = x * 280 + 350
         ypos = y * 80 + 200
 
+        if y == 4:
+            ypos = ypos + 50
+
         buttonList.append(Button((xpos, ypos), 300, 80, buttonListValues[y][x]))
 
 # Variables
