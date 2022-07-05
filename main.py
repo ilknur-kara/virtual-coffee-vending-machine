@@ -1,8 +1,10 @@
 import cv2
 from cvzone.HandTrackingModule import HandDetector
+import time
 
 
 class Button:
+    # Constructor of the Button class
     def __init__(self, pos, width, height, value):
         self.pos = pos
         self.width = width
@@ -41,6 +43,7 @@ imgFrappeBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/res
 imgLatteBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/lattebg.png")
 imgMochaBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/mochabg.png")
 imgPayBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/paybg.png")
+imgPayBg2 = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/pay2.jpeg")
 imgRisseBg = cv2.imread("/Users/black/PycharmProjects/VirtualVendingMachine/resources/ristrettobg.png")
 
 # WebCam
@@ -69,7 +72,7 @@ for x in range(2):
 # Variables
 myChoice = ''
 delayCounter = 0
-
+counter = 0
 isContinue = False
 
 myChoiceImg = imgBackground
@@ -80,7 +83,7 @@ def chosen_value(chosen):
     return chosen + " is chosen."
 
 
-while True:
+while counter < 2:
     # Get image from webcam
     success, img = cap.read()
     img = cv2.flip(img, 1)
@@ -88,11 +91,27 @@ while True:
     # Detection hand
     hands, img = detector.findHands(img, flipType=False)
 
-    # Overlaying the background image
-    img = cv2.addWeighted(img, 0.2, myChoiceImg, 0.8, 0)
+    # # Display Image
+    # key = cv2.waitKey(1)
+    # # cv2.imshow("Virtual Coffee Vending Machine", img)
+    #
+    # if key == ord('c'):
+    #     img = cv2.addWeighted(img, 0.2, myChoiceImg, 0.8, 0)
+    #     for button in buttonList:
+    #         button.draw(img)
 
-    for button in buttonList:
-        button.draw(img)
+    # Overlaying the background image
+    if counter < 1:
+        img = cv2.addWeighted(img, 0.2, myChoiceImg, 0.8, 0)
+        for button in buttonList:
+            button.draw(img)
+    else:
+        time.sleep(1)
+        img = cv2.flip(img, 1)
+        myChoiceImg = imgPayBg2
+        img = cv2.addWeighted(img, 0.2, myChoiceImg, 0.8, 0)
+        myChoice = ''
+        myChoiceImg = imgBackground
 
     # Finger Click
     if hands:
@@ -137,6 +156,7 @@ while True:
                         # After payment is done, turn it to isContinue false to prevent to press payment directly.
                         isContinue = False
                         myChoiceImg = imgPayBg
+                        counter = counter + 1
                     else:
                         # To prevent writing something to screen among clicks.
                         myChoice = ''
